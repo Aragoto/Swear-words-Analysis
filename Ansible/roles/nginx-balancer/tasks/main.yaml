@@ -1,0 +1,14 @@
+---
+- name: Write Nginx configuration file
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/project.conf
+  register: nginx_conf
+
+- name: Start the Nginx
+  shell: >
+    sudo systemctl restart nginx
+
+- pause:
+    seconds: 10

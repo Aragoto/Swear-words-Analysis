@@ -1,0 +1,11 @@
+---
+- name: upload the slavenode2 script
+  become: yes
+  copy:
+    src: ./slavenode2.sh
+    dest: /home/ubuntu/
+    mode: 0777
+
+- name: execute the slavenode2 script
+  become: yes
+  shell: /home/ubuntu/slavenode2.sh {{ slavenode2 }}

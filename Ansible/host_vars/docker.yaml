@@ -1,0 +1,15 @@
+---
+volumes_device: /dev/vdb
+mountpoint: /data
+docker_dir: /docker
+couchdb_dir: /var/lib/couchdb
+docker_proxy_http: /etc/systemd/system/docker.service.d/http-proxy.conf
+docker_proxy_https: /etc/systemd/system/docker.service.d/https-proxy.conf
+environment_proxy: /etc/environment
+proxy:
+    - 'HTTP_PROXY="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'HTTPS_PROXY="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'http_proxy="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'https_proxy="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'ftp_proxy="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'no_proxy=localhost,127.0.0.1,127.0.1.1,ubuntu,localhostaddress'

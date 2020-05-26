@@ -1,0 +1,78 @@
+---
+- name: Update host ip address
+  lineinfile:
+    line: "[all:vars]\nansible_ssh_user=ubuntu\nansible_ssh_private_key_file=./Group66.pem\n"
+    dest: "./inventory/hosts.ini"
+
+- name: Update nginxnode ip address
+  lineinfile:
+    line: "[nginxnode]\n{{ os_instance1.openstack.public_v4 }}\n"
+    dest: "./inventory/hosts.ini"
+
+- name: Update masternode ip address
+  lineinfile:
+    line: "[masternode]\n{{ os_instance2.openstack.public_v4 }}\n"
+    dest: "./inventory/hosts.ini"
+
+- name: Update slavenode1 ip address
+  lineinfile:
+    line: "[slavenode1]\n{{ os_instance3.openstack.public_v4 }}\n"
+    dest: "./inventory/hosts.ini"
+
+- name: Update slavenode2 ip address
+  lineinfile:
+    line: "[slavenode2]\n{{ os_instance4.openstack.public_v4 }}\n"
+    dest: "./inventory/hosts.ini"
+
+- name: Update all ip address
+  lineinfile:
+    line: "[nodes]\n{{ os_instance1.openstack.public_v4 }}\n{{ os_instance2.openstack.public_v4 }}\n{{ os_instance3.openstack.public_v4 }}\n{{ os_instance4.openstack.public_v4 }}\n"
+    dest: "./inventory/hosts.ini"
+
+- name: Update slavenodes
+  lineinfile:
+    line: "[slavenodes]\n{{ os_instance3.openstack.public_v4 }}\n{{ os_instance4.openstack.public_v4 }}\n"
+    dest: "./inventory/hosts.ini"
+
+- name: ensure varianble file exists
+  become: yes
+  copy:
+    content: ""
+    dest: ./host_vars/couchdb.yaml
+    force: no
+    mode: u=rwx, g=rwx, o=rwx
+    owner: root
+
+- name: Update nginxnode ip address in couchdb vars
+  lineinfile:
+    line: "nginxnode: {{ os_instance1.openstack.public_v4 }}\n"
+    dest: "./host_vars/couchdb.yaml"
+
+- name: Update masternode ip address in couchdb vars
+  lineinfile:
+    line: "masternode: {{ os_instance2.openstack.public_v4 }}\n"
+    dest: "./host_vars/couchdb.yaml"
+
+- name: Update slavenode1 ip address in couchdb vars
+  lineinfile:
+    line: "slavenode1: {{ os_instance3.openstack.public_v4 }}\n"
+    dest: "./host_vars/couchdb.yaml"
+
+- name: Update slavenode2 ip address in couchdb vars
+  lineinfile:
+    line: "slavenode2: {{ os_instance4.openstack.public_v4 }}\n"
+    dest: "./host_vars/couchdb.yaml"
+
+- name: ensure txt file exists
+  become: yes
+  copy:
+    content: ""
+    dest: ./nodes.txt
+    force: no
+    mode: u=rwx, g=rwx, o=rwx
+    owner: root
+
+- name: Update nginxnode ip addresses in lookup txt file
+  lineinfile:
+    line: "{{ os_instance1.openstack.public_v4 }}\n{{ os_instance2.openstack.public_v4 }}\n{{ os_instance3.openstack.public_v4 }}\n{{ os_instance4.openstack.public_v4 }}\n"
+    dest: "./nodes.txt"

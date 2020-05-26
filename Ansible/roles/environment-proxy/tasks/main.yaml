@@ -1,0 +1,12 @@
+---
+- name: change authority
+  raw: sudo chmod 755 /etc/environment
+
+- name: set proxy
+  tags: 'always'
+  become: yes
+  lineinfile:
+    dest: '{{ environment_proxy }}'
+    insertafter: EOF
+    line: '{{ item }}'
+  loop: '{{ proxy }}'

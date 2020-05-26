@@ -1,0 +1,13 @@
+---
+- hosts: nodes
+  vars_files:
+    - host_vars/docker.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: environment-proxy
+    - role: environment-configuration
+    - role: openstack-mount
+    - role: docker-configuration
+    - role: docker-proxy
+

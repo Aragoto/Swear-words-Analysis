@@ -1,0 +1,23 @@
+---
+- name: upload database setup file
+  copy:
+    src: ../../../database.zip
+    dest: /home/ubuntu
+    mode: 0777
+
+- name: delete init_config
+  become: yes
+  raw: rm -rf __MACOSX
+
+- name: delete init_config
+  raw: unzip database.zip
+
+- name: upload the database script
+  copy:
+    src: ./database.sh
+    dest: /home/ubuntu/
+    mode: 0777
+
+- name: execute the database script
+  become: yes
+  shell: /home/ubuntu/database.sh

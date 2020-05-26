@@ -1,0 +1,49 @@
+---
+- name: Creates directory
+  become: yes
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: u=rwx,g=rwx,o=rwx
+    owner: root
+
+- name: ensure file exists
+  become: yes
+  copy:
+    content: ""
+    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+    force: no
+    owner: root
+    mode: u=rwx,g=rwx,o=rwx
+
+- name: ensure file exists
+  become: yes
+  copy:
+    content: ""
+    dest: /etc/systemd/system/docker.service.d/https-proxy.conf
+    force: no
+    owner: root
+    mode: u=rwx,g=rwx,o=rwx
+
+- name: set docker-http-proxy
+  become: yes
+  copy:
+    dest: '{{ docker_proxy_http }}'
+    content: "[Service]\nEnvironment=\"HTTP_PROXY=http://wwwproxy.unimelb.edu.au:8000\""
+
+- name: set docker-https-proxy
+  become: yes
+  copy:
+    dest: '{{ docker_proxy_https }}'
+    content: "[Service]\nEnvironment=\"HTTP_PROXY=http://wwwproxy.unimelb.edu.au:8000\""
+
+- name: restart docker
+  raw: sudo systemctl daemon-reload; sudo systemctl restart docker
+
+- name: pull the image of couchdb 2.3.0
+  become: yes
+  command: docker pull couchdb:2.3.0
+
+- name: pull the image of apache
+  become: yes
+  command: docker pull httpd

@@ -1,0 +1,33 @@
+---
+- hosts: nginxnode
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: couchdb-nginxnode
+
+- hosts: slavenode1
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: couchdb-slave1
+
+- hosts: slavenode2
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: couchdb-slave2
+
+- hosts: masternode
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: couchdb-masternode
+    - role: database-setup

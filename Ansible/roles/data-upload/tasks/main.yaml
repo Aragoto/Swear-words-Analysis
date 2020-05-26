@@ -1,0 +1,11 @@
+---
+- name: upload the database script
+  become: yes
+  copy:
+    src: ./upload.sh
+    dest: /home/ubuntu/
+    mode: 0777
+
+- name: execute the database script
+  become: yes
+  shell: /home/ubuntu/upload.sh

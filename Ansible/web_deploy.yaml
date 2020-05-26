@@ -1,0 +1,40 @@
+---
+- hosts: masternode
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: uwsgi-configuration
+    - role: nginx-nodes
+    - role: master-scope
+
+- hosts: slavenode1
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: uwsgi-configuration
+    - role: nginx-nodes
+    - role: slave1-scope
+
+- hosts: slavenode2
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: uwsgi-configuration
+    - role: nginx-nodes
+    - role: slave2-scope
+
+- hosts: nginxnode
+  vars_files:
+    - host_vars/couchdb.yaml
+  remote_user: ubuntu
+  gather_facts: true
+  roles:
+    - role: nginx-balancer
+    - role: nginx-scope
+

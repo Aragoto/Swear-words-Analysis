@@ -1,0 +1,29 @@
+---
+- name: upload web project
+  copy:
+    src: ../../../project.zip
+    dest: /home/ubuntu
+    mode: 0777
+
+- name: delete init_config
+  become: yes
+  raw: rm -rf __MACOSX
+
+- name: unzip project.zip
+  raw: unzip /home/ubuntu/project.zip
+  
+- name: upload the uwsgi script
+  copy:
+    src: ./uwsgi.ini
+    dest: /home/ubuntu/project
+    mode: 0777
+
+- name: Creates logs directory
+  file:
+    path: /home/ubuntu/project/logs
+    state: directory
+    mode: u=rwx,g=rwx,o=rwx
+    mode: 0777
+
+- name: start uwsgi
+  raw: uwsgi --ini /home/ubuntu/project/uwsgi.ini

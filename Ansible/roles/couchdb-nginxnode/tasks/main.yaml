@@ -1,0 +1,11 @@
+---
+- name: upload the nginxnode script
+  become: yes
+  copy:
+    src: ./nginxnode.sh
+    dest: /home/ubuntu/
+    mode: 0777
+
+- name: execute the nginxnode script
+  become: yes
+  shell: /home/ubuntu/nginxnode.sh {{ nginxnode }}
