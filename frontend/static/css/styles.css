@@ -1,0 +1,505 @@
+/* natural box model */
+html {
+    box-sizing: border-box;
+    height: 100%;
+    font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif!important;
+
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+/* Browser Upgrade Prompt */
+.browserupgrade {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+/* hides an element, but not from screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* no break */
+.nobr {
+    white-space: nowrap;
+}
+
+/*
+    STRUCTURE
+*/
+.container{
+    margin: 0 auto;
+}
+/*
+    Index Header
+ */
+#index_page{
+    background-image: url("../images/Dirty-Talk-GQQ-2019-032019.jpg");
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+header{
+    color: #f1f1f1;
+    padding-top: 50px;
+}
+header h1{
+    font-size: 60pt;
+    text-align: center;
+    margin: 0 auto;
+}
+header h2{
+    font-size: 40pt;
+    text-align: center;
+}
+header h3{
+    font-size: 30pt;
+    text-align: center;
+    margin: 0.5em auto 0;
+}
+header img{
+    height: 100px;
+    width: 100px;
+    margin: 0 auto;
+}
+/*
+    Index Navigation
+*/
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #FF75B8;
+    overflow-x: hidden;
+    padding-top: 60px;
+    transition: 0.5s;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 30px;
+    color: #f1f1f1;
+    display: block;
+    transition: 0.3s;
+    margin-bottom: 30px;
+}
+
+.sidenav a:hover {
+    color: #818181;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+#main {
+  transition: margin-left .5s;
+  /*padding: 20px;*/
+}
+
+#index_hamburger{
+    padding: 20px;
+    height: 75px;
+    width: 75px;
+    color: #f1f1f1;
+}
+
+
+
+
+
+/* About Page */
+.test{
+    height: 10px;
+    background-color: red;
+}
+#about .container, #stat .container{
+    padding: 1.0em 1.5em;
+    background-color: #454545;
+    color: #cccccc;
+}
+#about h1{
+    font-size: 20pt;
+    margin: 0 auto;
+}
+.layout img{
+    margin: 0 auto;
+}
+.layout{
+    height: 100%;
+}
+#about h2{
+    font-size: 18pt;
+}
+.layout p{
+    font-size: 20px;
+}
+.layout .left{
+    margin: 0 auto 1.0em;
+    line-height: 1.4;
+}
+
+.layout .right{
+    margin: 0 auto;
+}
+.member{
+    background-color: #FF75B8;
+    padding: 1.0em;
+    color: #eeeeee;
+}
+.member_list{
+    margin: 0 auto;
+    width: 100%;
+
+}
+.member h2{
+    margin: 0 !important;
+}
+
+.member_list td, .member_list th{
+    font-size: 12pt;
+    width: 500px;
+    text-align: left;
+    margin: 0.5em 0.5em 0;
+    height: 75px;
+}
+.member_list td:last-child, .member_list th:last-child{
+    width: 500px;
+}
+/* Top Navigation */
+.topnav{
+    background-color: #303030;
+    overflow: hidden;
+}
+
+.topnav a{
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 12px 14px;
+    text-decoration: none;
+    font-size: 16px;
+    border-bottom: 3px solid transparent;
+    width: 20%;
+}
+
+.topnav a:hover{
+    border-bottom: 3px solid #FF75B8;
+}
+
+.topnav a.active{
+    background-color: #FF75B8;
+}
+/*map page*/
+#map_page body {
+    margin: 0;
+    padding: 0;
+}
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+#map_page .legend{
+    background-color: #454545;
+    border-radius: 5px;
+    bottom: 30px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    font-size: 12pt;
+    font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    color: #cccccc;
+    padding: 10px;
+    position: absolute;
+    left: 10px;
+    z-index: 1;
+}
+
+#map_page .legend h4{
+    margin: 0 0 10px;
+    font-size: 16pt;
+}
+#map_page .legend div{
+    margin-left: 0.5em;
+}
+#map_page .legend div span{
+    border-radius: 50%;
+    display: inline-block;
+    height: 15px;
+    margin-right: 5px;
+    width: 15px;
+    vertical-align: center;
+}
+
+#map_page .filter{
+    background-color: #454545;
+    border-radius: 5px;
+    top: 45px;
+    font-size: 12pt;
+    color: #cccccc;
+    padding: 10px 0.5em 10px 0.5em;
+    position: absolute;
+    right: 0;
+    z-index: 1;
+}
+#map_page .filter label{
+    margin-right: 0.5em;
+    padding-top: 2.0em;
+}
+#map_page .navigation{
+    background-color: #303030;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    position: absolute;
+    z-index: 1;
+    width: 100%
+}
+#map_page .navigation a{
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 12px 14px;
+    text-decoration: none;
+    font-size: 16px;
+    border-bottom: 3px solid transparent;
+    width: 20%;
+}
+#map_page .navigation a:hover{
+    border-bottom: 3px solid #FF75B8;
+}
+#map_page .navigation a.active{
+    background-color: #FF75B8;
+}
+#map_page .popup {
+    height: 150px;
+    color: #cccccc;
+}
+#map_page .mapboxgl-popup-content {
+    background-color: #454545;
+    border-radius: 10px;
+    padding: 1em;
+    width: 400px;
+    font-size: 16pt;
+    line-height: 150%;
+}
+#map_page .mapboxgl-popup-tip {
+    border-bottom-color: #454545 !important;
+}
+#map_page input[type='radio']{
+    margin-top: -9px;
+    vertical-align: middle;
+}
+/*statistic page*/
+#stat {
+    background-color: #454545;
+}
+#stat h1{
+    font-size: 20pt;
+    margin: 0 auto;
+}
+#stat h2 {
+    margin-top: 50px;
+}
+#barchart {
+    background-color: #454545;
+    padding: 1.0em 1.0em 0;
+    position: relative;
+    top: 30px;
+}
+#stat #scenario_filter{
+    background-color: #454545;
+    height: 50px;
+}
+#scenario_filter a{
+    display: inline-block;
+    font-size: 14pt;
+    background-color: #FF75B8;
+    color: #cccccc;
+    text-decoration: none;
+    height: 30px;
+    width: 40%;
+    padding: 3px 8px 2px;
+    text-align: center;
+    border-radius: 3px;
+    margin-left: 1.0em;
+    margin-top: 0.5em;
+    }
+#scenario_filter a:hover{
+    background-color: #ff86c9;
+    color: #ffffff;
+}
+#piechart {
+    width: 100%;
+    height: 1200px;
+    padding-bottom: 2.0em;
+}
+    #piechart .left{
+        float:left;
+        height: 49%!important;
+        width: 49%!important;
+        margin-top: 2.0em;
+    }
+    #piechart .right{
+        float: right;
+        height: 49%!important;
+        width: 49%!important;
+        margin-top: 2.0em;
+    }
+    #emotion_piechart{
+        height: 49% !important;
+        width: 49% !important;
+        padding-top: 2.0em;
+        margin-left: 200px;
+    }
+
+/*
+    IMAGES
+*/
+img {
+    width: 100%;
+    display: block;
+}
+
+
+
+/* MEDIA QUERIES */
+/* X-Small devices (portait phones, less than 576px) */
+/* All styles up to this point in the stylesheet are for X-Small */
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+    .test { background-color: orange; }
+    #about h1 {font-size: 26pt;}
+    #about h2 {font-size: 22px;}
+    .topnav a{
+        font-size: 18px;
+        width: 20%;
+    }
+    .member_list td, .member_list th{font-size: 16pt;}
+    .member_list td, .member_list th {height: 100px;}
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .test { background-color: green; }
+    #about h1 {font-size: 30pt;}
+    #about h2 {font-size: 26px;}
+    #map_page .filter{
+        font-size: 16pt;
+        top: 48px;}
+    #map_page .legend {font-size: 16pt;}
+    #map_page .legend div{margin-left: 0.8em;}
+    #map_page .legend h4{font-size: 18pt;}
+    #map_page .navigation a{font-size: 18px;}
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .test { background-color: blue; }
+    #about h1 {font-size: 36pt;}
+    #about h2 {font-size: 30px;}
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .test {background-color: purple;}
+    header{padding-top: 100px;}
+    #about h1 {font-size: 40pt;}
+    #about h2 {font-size: 30px;}
+    .layout {height: 627px;}
+    .layout .left {
+        float: left;
+        height: 500px;
+        width: 49%;
+    }
+    .layout .right {
+        float: right;
+        width: 49%;
+        position: relative;
+        top: -190px;
+    }
+    .topnav a {
+        font-size: 20px;
+        width: 150px;
+    }
+    .member {height: 675px;}
+    .member_list {
+        position: relative;
+        top: -100px;
+    }
+    .member_list td, .member_list th {
+        height: 100px;
+        font-size: 26px;
+    }
+    .member_list td:last-child, .member_list th:last-child{
+        width: 500px;
+        /*white-space: nowrap;*/
+    }
+    #map_page .navigation a{
+        font-size: 20px;
+        padding: 14px 16px;
+    }
+    #map_page .filter{
+        font-size: 18pt;
+        top: 54px;
+        padding-left: 1.0em;
+    }
+    #map_page .legend h4{font-size: 20pt;}
+    #map_page .legend{font-size: 16pt;}
+    #map_page legend div{margin-left: 1.0em;}
+    #barchart {
+        top: 20px;
+    }
+    #stat h1{font-size: 40pt;}
+    #scenario_filter{height: 100px;}
+    #scenario_filter a{
+        font-size: 20pt;
+        height: 50px;
+        width: 250px;
+        border-radius: 10px;
+        padding: 6px 8px 4px;
+    }
+
+}
+
+/*Extreme large devices(extreme large desktops, 1400px and up)*/
+@media (min-width: 1500px){
+    .test { background-color: pink;}
+    header{padding-top: 90px;}
+    .layout {height: 700px;}
+    .layout .right {width: 40%;}
+    .layout .left {
+        height: 550px;
+        line-height: 1.8;
+    }
+    .member_list{top: 0;}
+    .member {height: 750px;}
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+
+}
