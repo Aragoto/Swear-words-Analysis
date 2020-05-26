@@ -13,7 +13,7 @@ import time
 import re
 import argparse
 import socket
-
+import math
 
 cities = ["Ballarat", "Banyule", "Baw Baw", "Bayside", "Benalla", "Boroondara", "Brimbank", "Campaspe",
 "Cardinia", "Casey", "Colac-Otway", "Corangamite", "Darebin", "East Gippsland", "Frankston", "Greater Shepparton",
@@ -35,15 +35,6 @@ with open('suburb-geo-lga-new.json') as suburb_file:
 
 print('preporcessed')
 
-def argsnb():
-    #deploy nginx and node
-    FLAG = argparse.ArgumentParser(description='servers')
-    FLAG.add_argument('--nginx')
-    FLAG.add_argument('--backup1')
-    FLAG.add_argument('--backup2')
-    arguments = FLAG.parse_args()
-    return arguments
-
 def GetDirtyList():
     #generate dirty word dict
     dirty_word = {}
@@ -60,22 +51,12 @@ def GetDirtyList():
     
     return dirty_word   
 
-nodes = argsnb()
+
     
 #connect to couchdb, and try another gate if one failed
-try:
-    couch = couchdb.Server('http://admin:password@localhost:5984')
-except:
-    try: 
-        couch = couchdb.Server('http://admin:password@'+nodes.nginx+':5984')
-    except:
-        try:
-            couch = couchdb.Server('http://admin:password@'+nodes.backup1+':5984')
-        except:
-            try:
-                couch = couchdb.Server('http://admin:password@'+nodes.backup2+':5984')
-            except Exception as e:
-                print("Can not access to the database! \n Please Check your internet.")
+
+couch = couchdb.Server('http://admin:password@localhost:5984')
+
 db_dirty = couch["dirty_words"]
 db_emotion = couch["emotion"]
 db_id = couch["tweet_id"]
@@ -157,28 +138,30 @@ def get_tweets(tweetJson, dirty_word_dic):
 
         print(dataDict)
         print("*****************************************")
-        CheckTweetID_And_AddToDB(dataDict)
-        
+        CheckTweetID_And_AddToDB(dataDict, dirty_word_dic)
 
 
-def DirtyWordProcess(dataDict):
+
+def DirtyWordProcess(dataDict, dirty_word_dic):
     #get the dirty words of tweets by regular expression, store them to couchdb
+    dirty_word_dic = GetDirtyList()
     tmp_dic = dataDict
     if tmp_dic["geo"] != None and tmp_dic["geo"] != "not specified" and  tmp_dic["geo"] != "" and tmp_dic["geo"] != None:
+        #check the geo information is not empty
         txt = tmp_dic["text"]
-        txt = txt.lower() 
+        txt = txt.lower()
         tmp_list = re.findall(r"\w+",txt)
         added_list = []
         for word in tmp_list:
             db_entry = {}
             if word in dirty_word_dic.keys() and word not in added_list:
                 db_entry["dirty_word"] = word
+                db_entry["id"] = tmp_dic["id"]
                 db_entry["city"] = tmp_dic["geo"]
                 added_list.append(word)
                 db_dirty.save(db_entry)
             else:
                 pass
-
 
 def EmotionProcess(dataDict):
     #transform polarity to positive, negative and neutral, and save to couchdb
@@ -194,27 +177,26 @@ def EmotionProcess(dataDict):
         else:
             dic_tweet["emotion"] = "Neutral"
         db_entry["city"] = tmp_dic["geo"]
+        db_entry["id"] = tmp_dic["id"]
         db_entry["emotion"] = dic_tweet["emotion"]
         db_emotion.save(db_entry)
 
-def CheckTweetID_And_AddToDB(dataDict):
+def CheckTweetID_And_AddToDB(dataDict, dirty_word_dic):
     #chech the tweet with same id have saved in couchdb or not, to decide whether this tweet to upload or not
     tmp_dic = dataDict
     id = str(tmp_dic["id"])
     db_entry = {}
     record = None
     if tmp_dic["geo"] != "not specified" and tmp_dic["geo"] != None:
-        #check the geo information is not empty
         for rec in db_id.view('tweet_id_record/tweet_id', key = id):
             record = rec
         if record == None:
             db_entry["tweet_id"] = id
             db_id.save(db_entry)
             EmotionProcess(dataDict)
-            DirtyWordProcess(dataDict)
+            DirtyWordProcess(dataDict, dirty_word_dic)
         else:
             print(id, ", this tweet's information has been added to the database!")
-
     
 
 maxid = None
@@ -264,8 +246,8 @@ while True:
                                 for tweet in tweepy.Cursor(api.user_timeline, screen_name=sn, exclude_replies=False,lang="en", tweet_mode="extended").items():
                                     tweetJson = tweet._json
                                     get_tweets(tweetJson, dirty_word_dic)
-                                    tweecount += 1
-                                    print(tweecount)
+                                    num += 1
+                                    print(num)
 
 
             elif tweetJson['place'] and tweetJson['place']['place_type'] == 'city':
@@ -280,8 +262,8 @@ while True:
                             for tweet in tweepy.Cursor(api.user_timeline, screen_name=sn, exclude_replies=False,lang="en", tweet_mode="extended").items():
                                     tweetJson = tweet._json
                                     get_tweets(tweetJson, dirty_word_dic)
-                                    tweecount += 1
-                                    print(tweecount)
+                                    num += 1
+                                    print(num)
 
     except tweepy.error.TweepError as e:
 			# catch error
@@ -319,4 +301,5 @@ while True:
                 start[i] = time.time()
                 print("changed to the" + str(i + 1) + " credential.")
                 continue
-                        
+            
+
