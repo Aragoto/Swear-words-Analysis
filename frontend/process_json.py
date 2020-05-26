@@ -115,6 +115,13 @@ def get_summary():
 # given a scenario and data point to get the percentile of this data point in this scenario
 # if the data is not in the population or the data value is 0 it will return 0
 def get_percentile(scenario, data, datalist):
+    def get_index(value, lst):
+        index = 0
+        for i in range(len(lst)):
+            if value <= lst[i]:
+                index = i
+                break
+        return index
     if scenario == 'economic':
         if data == 0:
             percentile = 0
@@ -147,7 +154,7 @@ def get_percentile(scenario, data, datalist):
             percentile = 0
         else:
             try:
-                percentile = round((datalist.index(data) + 1) / len(datalist), 4)
+                percentile = round(get_index(data, datalist)/ len(datalist), 4)
             except Exception as e:
                 print('Data not in the Population, return 0')
                 percentile = 0
@@ -262,3 +269,4 @@ def output_stat():
             wordcount_distribution['100-'] += 1
     output = [education_distribution, economic_distribution, unemployment_distribution, wordcount_distribution]
     return output
+print(output_stat())
