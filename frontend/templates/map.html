@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Map</title>
+
+    <!-- css stylesheet -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/normalize.css') }}"/><meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="{{ url_for('static', filename='js/Chart.js/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Chart.js/samples/utils.js') }}"></script>
+</head>
+<body id="map_page">
+    <div class="navigation">
+        <a href="{{ url_for('index') }} ">Home</a>
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="#" class="active">Map</a>
+        <a href="{{ url_for('statistics') }}">Statistics</a>
+        <a href="{{ url_for('monitor') }}">Monitor</a>
+    </div>
+
+    <span onclick="openNav()">
+        <i class="fas fa-bars" id="index_hamburger"></i>
+    </span>
+    <div id="map"></div>
+    <div id="education_legend" class="legend">
+        <h4>Education Level</h4>
+        <div><span style="background-color: #f407dd"></span>        0.80 - 1.0</div>
+        <div><span style="background-color: #f96be3"></span>        0.70 - 0.79</div>
+        <div><span style="background-color: #fa9fe9"></span>        0.60 - 0.69</div>
+        <div><span style="background-color: #f8c5ed"></span>        0.50 - 0.59</div>
+        <div><span style="background-color: #f5e0f0"></span>        0.40 - 0.49</div>
+        <div><span style="background-color: #f2f0f2"></span>        0.35 - 0.39</div>
+        <div><span style="background-color: #f0fdf3"></span>        0.00 - 0.34</div>
+    </div>
+    <div id="economic_legend" class="legend" style="display: none;">
+        <h4>Economic Index</h4>
+        <div><span style="background-color: #f407dd"></span>        1075+ </div>
+        <div><span style="background-color: #f96be3"></span>        1050 - 1074</div>
+        <div><span style="background-color: #fa9fe9"></span>        1025 - 1049</div>
+        <div><span style="background-color: #f8c5ed"></span>        1000 - 1024</div>
+        <div><span style="background-color: #f5e0f0"></span>        975 - 999</div>
+        <div><span style="background-color: #f2f0f2"></span>        950 - 974</div>
+        <div><span style="background-color: #f0fdf3"></span>        950-</div>
+    </div>
+        <div id="unemployment_legend" class="legend" style="display: none;">
+        <h4>Unemployment Rate</h4>
+        <div><span style="background-color: #f407dd"></span>        8.0+ </div>
+        <div><span style="background-color: #f96be3"></span>        7.0 - 7.9</div>
+        <div><span style="background-color: #fa9fe9"></span>        6.5 - 6.9</div>
+        <div><span style="background-color: #f8c5ed"></span>        6.0 - 6.4</div>
+        <div><span style="background-color: #f5e0f0"></span>        5.5 - 5.9</div>
+        <div><span style="background-color: #f2f0f2"></span>        5.0 - 5.5</div>
+        <div><span style="background-color: #f0fdf3"></span>        5.0-</div>
+    </div>
+    <div id="scenario_filter" class="filter">
+        <input type="radio" id="education" name="scenario" value="education" checked="checked">
+        <label for="education">Education Level</label>
+        <br>
+        <input type="radio" id="economic" name="scenario" value="economic">
+        <label for="economic"> Economic Index</label>
+        <br>
+        <input type="radio" id="unemployment" name="scenario" value="unemployment">
+        <label for="unemployment"> Unemployment Rate</label>
+        <br>
+    </div>
+    <script>
+        {# initialize a Mapbox object #}
+	    mapboxgl.accessToken = 'pk.eyJ1Ijoic3RldmV5MDcxNCIsImEiOiJjazllNHJhcXcwMW4wM25ubncwZnh0MTlkIn0.lVMZh06SmKK6NXPRjpJAgg';
+        var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/stevey0714/ck9y58jcj08st1jmvekmn0l0m',
+            center: [145.035, -37.810], // starting position [lng, lat]
+            zoom: 8.70, // starting zoom
+        });
+
+        {# get data from Flask #}
+        var data = [
+            {% for line in get_data() %}
+            {
+                {% for key, value in line.items() %}
+                    {% if key == "LG_PLY_PID" %}
+                        '{{ key }}': '{{ value }}',
+                    {% else %}
+                        '{{ key }}': {{ value }},
+                    {% endif %}
+                {% endfor %}
+            },
+            {% endfor %}
+        ];
+        var education = document.getElementById('education');
+        var economic = document.getElementById('economic');
+        var unemployment = document.getElementById('unemployment');
+
+        {# get the current active scenario from the filter #}
+        function get_current() {
+            var current_scenario;
+            if (document.getElementById('education').checked) {
+                current_scenario = document.getElementById('education').value;
+            } else if (document.getElementById('economic').checked){
+                current_scenario = document.getElementById('economic').value;
+            } else {
+                current_scenario = document.getElementById('unemployment').value;
+            }
+            return current_scenario;
+        }
+
+        {# output the color expression for Mapbox choropleth #}
+        function output_expression() {
+            var expression = ['match', ['get', 'LG_PLY_PID']];
+            var current_scenario = get_current();
+            data.forEach(function (row) {
+                var color;
+                if (current_scenario === 'education') {
+                    if (row['EDUCATION'] >= 0.8) {
+                        color = '#f407dd';
+                    } else if (row['EDUCATION'] >= 0.7) {
+                        color = '#f96be3';
+                    } else if (row['EDUCATION'] >= 0.6) {
+                        color = '#fa9fe9';
+                    } else if (row['EDUCATION'] >= 0.5) {
+                        color = '#f8c5ed';
+                    } else if (row['EDUCATION'] >= 0.4) {
+                        color = '#f5e0f0';
+                    } else if (row['EDUCATION'] >= 0.35) {
+                        color = '#f2f0f2';
+                    } else {
+                        color = '#f0fdf3';
+                    }
+                } else if (current_scenario === 'economic') {
+                    if (row['ECONOMIC'] >= 1075){
+                        color = '#f407dd';
+                    } else if (row['ECONOMIC'] >= 1050) {
+                        color = '#f96be3';
+                    } else if (row['ECONOMIC'] >= 1025) {
+                        color = '#fa9fe9';
+                    } else if (row['ECONOMIC'] >= 1000) {
+                        color = '#f8c5ed';
+                    } else if (row['ECONOMIC'] >= 975) {
+                        color = '#f5e0f0';
+                    } else if (row['ECONOMIC'] >= 950) {
+                        color = '#f2f0f2';
+                    } else {
+                        color = '#f0fdf3';
+                    }
+                } else {
+                    if (row['UNEMPLOYMENT'] >= 8.0){
+                        color = '#f407dd';
+                    } else if (row['UNEMPLOYMENT'] >= 7.0) {
+                        color = '#f96be3';
+                    } else if (row['UNEMPLOYMENT'] >= 6.5) {
+                        color = '#fa9fe9';
+                    } else if (row['UNEMPLOYMENT'] >= 6.0) {
+                        color = '#f8c5ed';
+                    } else if (row['UNEMPLOYMENT'] >= 5.5) {
+                        color = '#f5e0f0';
+                    } else if (row['UNEMPLOYMENT'] >= 5.0) {
+                        color = '#f2f0f2';
+                    } else {
+                        color = '#f0fdf3';
+                    }
+                }
+                expression.push(row['LG_PLY_PID'], color);
+            });
+            expression.push('rgba(0,0,0,0)');
+            return expression;
+        }
+
+        {# update the legend by current active scenario #}
+        function updateLegend(){
+            var current_scenario = get_current();
+            if (current_scenario === "education"){
+                document.getElementById('education_legend').style.display = 'block';
+                document.getElementById('economic_legend').style.display = 'none';
+                document.getElementById('unemployment_legend').style.display = 'none';
+            } else if (current_scenario === 'economic') {
+                document.getElementById('education_legend').style.display = 'none';
+                document.getElementById('economic_legend').style.display = 'block';
+                document.getElementById('unemployment_legend').style.display = 'none';
+            } else {
+                document.getElementById('education_legend').style.display = 'none';
+                document.getElementById('economic_legend').style.display = 'none';
+                document.getElementById('unemployment_legend').style.display = 'block';
+            }
+        }
+        {# set color for each polygon and scenario #}
+        education.addEventListener('click', function(){
+            map.setPaintProperty('city', 'fill-color', output_expression());
+            updateLegend();
+        });
+        economic.addEventListener('click', function(){
+            map.setPaintProperty('city', 'fill-color', output_expression());
+            updateLegend();
+        });
+        unemployment.addEventListener('click', function(){
+            map.setPaintProperty('city', 'fill-color', output_expression());
+            updateLegend();
+        });
+        {# add a layer on the map for choropleth #}
+        map.on('load', function () {
+            map.addSource('city', {
+                'type': 'vector',
+                'url': 'mapbox://stevey0714.by53k717'
+            });
+            map.addLayer(
+                {
+                    'id': 'city',
+                    'type': 'fill',
+                    'source': 'city',
+                    'source-layer': 'VIC_LOCALITY_POLYGON_shp-9n7osk',
+                    'paint': {
+                        'fill-color': output_expression(),
+                        'fill-opacity': 0.75
+                    }
+                },
+                'waterway-label'
+            );
+        });
+        map.on('click', 'city', function(e) {
+            {# initialize the scenario value, emotion data and word count for each city #}
+            var city_id = e.features[0].properties.LG_PLY_PID;
+            var word_count = 0;
+            var city_name = e.features[0].properties.VIC_LGA__3;
+            var current_scenario = get_current();
+            var scenario_value = 0;
+            var scenario_percentile = 0;
+            var wordcount_percentile = 0;
+            var emotion_positive = 0;
+            var emotion_negative = 0;
+            var emotion_neutral = 0
+            data.forEach(function(row) {
+                if (row['LG_PLY_PID'] === city_id){
+                    word_count = row['WORD_COUNT'];
+                    scenario_value = row[current_scenario.toUpperCase()].toFixed(2);
+                    scenario_percentile = row[current_scenario.toUpperCase()+"_PERCENTILE"];
+                    wordcount_percentile = row['WORD_COUNT_PERCENTILE'];
+                    emotion_positive = row['EMOTION_POSITIVE'];
+                    emotion_negative = row['EMOTION_NEGATIVE'];
+                    emotion_neutral = row['EMOTION_NEUTRAL'];
+                }
+            });
+            {# set up the chart data and config #}
+            var horizontalBarChartData;
+            var emotionPieConfig;
+            if (word_count === 0 && scenario_value != 0) {
+                horizontalBarChartData = {
+                    labels: [[current_scenario[0].toUpperCase() + current_scenario.slice(1), "Percentile"]],
+                    datasets: [{
+                    backgroundColor: '#f96be3',
+                    borderColor: '#f96be3',
+                    borderWidth: 1,
+                    data: [scenario_percentile]
+                }]
+                };
+            } else if (word_count !== 0 && scenario_value == 0) {
+                horizontalBarChartData = {
+                    labels: [['Word Count', 'Percentile']],
+                    datasets: [{
+                    backgroundColor: '#f96be3',
+                    borderColor: '#f96be3',
+                    borderWidth: 1,
+                    data: [wordcount_percentile]
+                }]
+                };
+               emotionPieConfig = {
+                    type: 'pie',
+                    data: {
+                        datasets: [{
+                            data: [emotion_positive, emotion_negative, emotion_neutral],
+                            backgroundColor: ['#f96be3', '#3970dd', '#754af7'],
+                        }],
+                        labels: ['Positve', 'Negative', 'Neutral'],
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: false,
+                            text: 'Emotion Analysis',
+                            fontColor: '#cccccc',
+                            fontSize: 20,
+                        },
+                        legend: {
+                            display: true,
+                        labels:{
+                            fontColor: '#cccccc',
+                            fontSize: 12,
+                            },
+                        position: 'right'
+                        }
+                    }
+                };
+            } else {
+                horizontalBarChartData = {
+                    labels: [[current_scenario[0].toUpperCase() + current_scenario.slice(1), "Percentile"],
+                        ['Word Count', 'Percentile']],
+                    datasets: [{
+                        backgroundColor: '#f96be3',
+                        borderColor: '#f96be3',
+                        borderWidth: 1,
+                        data: [scenario_percentile, wordcount_percentile]
+                    }]
+                };
+                emotionPieConfig = {
+                    type: 'pie',
+                    data: {
+                        datasets: [{
+                            data: [emotion_positive, emotion_negative, emotion_neutral],
+                            backgroundColor: ['#f96be3', '#3970dd', '#754af7'],
+                        }],
+                        labels: ['Positve', 'Negative', 'Neutral'],
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: false,
+                            text: 'Emotion Analysis',
+                            fontColor: '#cccccc',
+                            fontSize: 20,
+                        },
+                        legend: {
+                            display: true,
+                        labels:{
+                            fontColor: '#cccccc',
+                            fontSize: 12,
+                            },
+                        position: 'right'
+                        }
+                    }
+                };
+            }
+
+            {# setup a popup window for display data and charts #}
+            var popup = new mapboxgl.Popup({className: 'popup', anchor:'top'});
+            var outputString;
+            if (word_count === 0 && scenario_value == 0.00) {
+                console.log('yes')
+                outputString = 'City Name: ' + city_name[0] + city_name.slice(1).toLowerCase() +
+                '<br><p>No data available</p>';
+            } else {
+                outputString = '<div>City Name: ' + city_name[0]+ city_name.slice(1).toLowerCase() +
+                    '<br>Word Count: ' + word_count + '<br>' +
+                    current_scenario[0].toUpperCase() + current_scenario.slice(1) + ": " +
+                    scenario_value + '<br><canvas id="bar"" ></canvas></div>' +
+                    '<div><canvas id="pie"></canvas></div>';}
+            popup.setLngLat(e.lngLat)
+                .setHTML(outputString).addTo(map);
+            {# initalize a bar chart object in Chart.js #}
+            var barCtx = document.getElementById('bar').getContext('2d');
+            var barChart = new Chart(barCtx, {
+                type: 'horizontalBar',
+                data: horizontalBarChartData,
+                options: {
+                    elements: {
+                        rectangle: {
+                            borderwidth: 2,
+                        }
+                    },
+                    resposive: true,
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: false,
+                    },
+                    scales: {
+                        xAxes: [{
+                            gridLines: {
+                                color: '#cccccc',
+                            },
+                            ticks: {
+                                max: 1,
+                                min: 0,
+                                stepSize: 0.25,
+                                fontColor: '#cccccc',
+                                fontSize: 12,
+                            },
+                        }],
+                        yAxes: [{
+                            gridLines: {
+                                color: '#cccccc',
+                            },
+                            barPercentage: 0.3,
+                            ticks: {
+                                fontColor: '#cccccc',
+                                fontSize: 20
+                            }
+
+                        }]
+                    }
+                }
+            });
+            {# initialize a pie chart in Chart.js #}
+            var pieCtx = document.getElementById('pie').getContext('2d');
+            var pieChart = new Chart(pieCtx, emotionPieConfig);
+        });
+        {# setting the cursor style on the map #}
+        map.on('mouseenter', 'suburb', function(){
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'suburb', function(){
+            map.getCanvas().style.cursor = 'default';
+        });
+
+    </script>
+
+</body>
+</html>

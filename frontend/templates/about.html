@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>About This Project</title>
+
+    <!-- css stylesheet -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/normalize.css') }}">
+</head>
+<body id="about">
+    <div class="topnav">
+        <a href="{{ url_for('index') }} ">Home</a>
+        <a href="#" class="active">About</a>
+        <a href="{{ url_for('map') }}">Map</a>
+        <a href="{{ url_for('statistics') }}">Statistics</a>
+        <a href="{{ url_for('monitor') }}">Monitor</a>
+    </div>
+    <div class="container">
+        <h1>About This Project</h1>
+    </div>
+
+    <div class="container layout">
+        <h2>Project Layout</h2>
+        <p class="left">
+            The purpose of this project is to analyse a large amount of data from social media in the
+            context of the increasing importance of social media. The main method is to count the number
+            of swear words contained in tweets in different cities and analyse the emotions of tweets,
+            explore the connection between education level, unemployment rate and economic level with
+            emotions of people and swear word. A large number of tweets can provide a lot of useful
+            information for analysis tasks and help to improve the quality of analysis results.
+            However, due to the rapid growth of data and the large storage space required, data
+            analysis and processing often require a system with a good framework and design to support
+            the processing of big data analysis. This project established a clustered data analysis
+            system based on Nectar Cloud and realized the visualization of the analysis results. In
+            this system, we combine the processed data with the statistical data of the Australian
+            Urban Research Infrastructure Network (AURIN) platform to explore the story between different
+            factors, different emotions and the frequency of swear word.
+        </p>
+        <img src="{{ url_for('static', filename='images/structure.jpg') }}" alt="Here should be Project Layout" class="right">
+    </div>
+    <div class="member">
+        <h2>Group Member Information</h2>
+        <table class="member_list">
+            <tr>
+                <th>Member Name</th>
+                <th>Student Number</th>
+                <th>Role in the Project</th>
+            </tr>
+            <tr>
+                <td>Ansheng Dong</td>
+                <td>989973</td>
+                <td>Tweet Harvest, Data Pre-process, Data Analysis</td>
+            </tr>
+            <tr>
+                <td>Dongting Hu</td>
+                <td>960886</td>
+                <td>CouchDB, Docker, Ansible, Data Analysis</td>
+            </tr>
+            <tr>
+                <td>Xinshu Li</td>
+                <td>875109</td>
+                <td>Data Process, Data Analysis, CouchDB</td>
+            </tr>
+            <tr>
+                <td>Tonghao Wang</td>
+                <td>1039694</td>
+                <td>Ansible, Nginx, Docker, CouchDB, Weave Scope</td>
+            </tr>
+            <tr>
+                <td>Qinwei Yuan</td>
+                <td>1006223</td>
+                <td>Web, Data Tweet Harvest</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

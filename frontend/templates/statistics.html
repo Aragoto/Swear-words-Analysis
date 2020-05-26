@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Statistics</title>
+
+    <!-- css stylesheet -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/normalize.css') }}">
+    <script src="{{ url_for('static', filename='js/Chart.js/Chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Chart.js/samples/utils.js') }}"></script>
+</head>
+<body id="stat">
+    <div class="topnav">
+        <a href="{{ url_for('index') }} ">Home</a>
+        <a href="{{ url_for('about') }}" >About</a>
+        <a href="{{ url_for('map') }}">Map</a>
+        <a href="#" class="active">Statistics</a>
+        <a href="{{ url_for('monitor') }}">Monitor</a>
+    </div>
+    <div class="container">
+        <h1>Statistics</h1>
+    </div>
+    <div id="scenario_filter">
+        <a href="#barchart" id="education">Education</a>
+        <a href="#barchart" id="economic">Economic</a>
+        <a href="#barchart" id="unemployment">Unemployment</a>
+        <a href="#barchart" id="wordcount">Word Count</a>
+    </div>
+    <canvas id="barchart"></canvas>
+    <div class="container">
+        <h2>Counts in Each Step</h2>
+    </div>
+    <div class="container" id="piechart">
+        <div>
+            <canvas id="education_piechart" class="left"></canvas>
+            <canvas id="economic_piechart" class="right"></canvas>
+        </div>
+        <div>
+            <canvas id="unemployment_piechart" class="left"></canvas>
+            <canvas id="wordcount_piechart" class="right"></canvas>
+        </div>
+        <div>
+            <canvas id="emotion_piechart"></canvas>
+        </div>
+    </div>
+    <script>
+        {# generate data from the Flask application #}
+        function generateData(scenario) {
+            var cityList = [];
+            var scenarioData = [];
+            if (scenario === 'education') {
+                {% for city in data %}
+                    {% if city['EDUCATION'] != 0 %}
+                        cityList.push('{{ id_to_name[city['LG_PLY_PID']] }}');
+                        scenarioData.push('{{ city['EDUCATION']|round(2) }}');
+                    {% endif %}
+                {% endfor %}
+            } else if (scenario === 'economic') {
+                {% for city in data %}
+                    {% if city['ECONOMIC'] != 0 %}
+                        cityList.push('{{ id_to_name[city['LG_PLY_PID']] }}');
+                        scenarioData.push('{{ city['ECONOMIC']|round|int }}');
+                    {% endif %}
+                {% endfor %}
+            } else if (scenario === 'unemployment') {
+                {% for city in data %}
+                    {% if city['UNEMPLOYMENT'] != 0 %}
+                        cityList.push('{{ id_to_name[city['LG_PLY_PID']] }}');
+                        scenarioData.push('{{ city['UNEMPLOYMENT']|round(2) }}');
+                    {% endif %}
+                {% endfor %}
+            } else if (scenario === 'word_count') {
+                {% for city in data %}
+                    {% if city['WORD_COUNT'] != 0 %}
+                        cityList.push('{{ id_to_name[city['LG_PLY_PID']] }}');
+                        scenarioData.push('{{ city['WORD_COUNT']|round(2) }}');
+                    {% endif %}
+                {% endfor %}
+            }
+            return [cityList, scenarioData]
+        }
+        {# setup varibales for cities and data for each city #}
+        var educationCityList = generateData('education')[0];
+        var educationData = generateData('education')[1];
+        var economicCityList = generateData('economic')[0];
+        var economicData = generateData('economic')[1];
+        var unemploymentCityList = generateData('unemployment')[0];
+        var unemploymentData = generateData('unemployment')[1];
+        var wordcountCityList = generateData('word_count')[0];
+        var wordcountData = generateData('word_count')[1];
+
+        {# set up bar chart data #}
+        var barChartData = {
+            labels: educationCityList,
+            datasets: [{
+                label: "Education Level",
+                backgroundColor: '#cccccc',
+                borderColor: '#cccccc',
+                borderWidth: 1,
+                hoverBackgroundColor: '#FF75B8',
+                hoverBorderColor: '#FF75B8',
+                data: educationData
+            }]
+        };
+        {# remove the chart for rebuilt of the chart #}
+        function removeData(chart) {
+            {#chart.data.labels.pop();#}
+            chart.data.datasets.pop();
+            chart.update();
+        }
+        {# set up a custom on hover label for bar chart #}
+        Chart.Tooltip.positioners.custom = function(elements, eventPosition) {
+            var tooltip = this;
+            return {
+                x: eventPosition.x,
+                y: eventPosition.y
+            };
+        };
+        {# initialize a bar chart object #}
+        var ctx = document.getElementById('barchart').getContext('2d');
+        myBar = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                tooltips:{
+                    position: 'custom',
+                },
+                responsive: true,
+                legend: {
+                    display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Education Index for Cities in Victoria',
+                    fontColor: '#cccccc',
+                    fontSize: 30,
+
+                },
+                scales:{
+                    xAxes: [{
+                        gridLines: {
+                            color: '#cccccc',
+                        },
+                        ticks: {
+                            fontColor: '#cccccc',
+                        }
+                    }],
+                    yAxes: [{
+                        gridLines: {
+                            color: '#cccccc',
+                            },
+                        ticks: {
+                            fontColor: '#cccccc',
+                            fontSize: 18,
+                        }
+                    }]
+                },
+                animation: {
+                    duration: 1000,
+                    onComplete: function () {
+                        var chartInstance = this.chart,
+                        ctx = chartInstance.ctx;
+                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = '#cccccc';
+                        ctx.textBaseline = 'bottom';
+
+                        this.data.datasets.forEach(function (dataset, i) {
+                            var meta = chartInstance.controller.getDatasetMeta(i);
+                            meta.data.forEach(function (bar, index) {
+                                var data = dataset.data[index];
+                                var yValue = bar._model.y.toFixed(2);
+                                ctx.fillText(data, bar._model.x, yValue);
+                            });
+            });
+        }
+    }
+            }
+        });
+        {# update data for bar chart in different scenario #}
+        document.getElementById('economic').addEventListener('click', function() {
+            removeData(myBar);
+            var economicDataset = {
+                label: 'Economic Index',
+                backgroundColor: '#cccccc',
+                borderColor: '#cccccc',
+                borderWidth: 1,
+                hoverBackgroundColor: '#FF75B8',
+                hoverBorderColor: '#FF75B8',
+                data: economicData
+            };
+            barChartData.datasets.push(economicDataset);
+            barChartData.labels = economicCityList;
+            myBar.options.title.text = 'Economic Index for Cities in Victoria';
+            myBar.update();
+        });
+        document.getElementById('education').addEventListener('click', function() {
+            removeData(myBar);
+            var educationDataset = {
+                label: 'Education Level',
+                backgroundColor: '#cccccc',
+                borderColor: '#cccccc',
+                borderWidth: 1,
+                hoverBackgroundColor: '#FF75B8',
+                hoverBorderColor: '#FF75B8',
+                data: educationData
+            };
+            barChartData.datasets.push(educationDataset);
+            barChartData.labels = educationCityList;
+            myBar.options.title.text = 'Education Level for Cities in Victoria';
+            myBar.update();
+        });
+        document.getElementById('wordcount').addEventListener('click', function() {
+            removeData(myBar);
+            var wordCountDataset = {
+                label: 'Word Count',
+                backgroundColor: '#cccccc',
+                borderColor: '#cccccc',
+                borderWidth: 1,
+                hoverBackgroundColor: '#FF75B8',
+                hoverBorderColor: '#FF75B8',
+                data: wordcountData
+            };
+            barChartData.datasets.push(wordCountDataset);
+            barChartData.labels = wordcountCityList;
+            myBar.options.title.text = 'Swear Word Count for Cities in Victoria';
+            myBar.update();
+        });
+        document.getElementById('unemployment').addEventListener('click', function() {
+            removeData(myBar);
+            var unemploymentDataset = {
+                label: 'Word Count',
+                backgroundColor: '#cccccc',
+                borderColor: '#cccccc',
+                borderWidth: 1,
+                hoverBackgroundColor: '#FF75B8',
+                hoverBorderColor: '#FF75B8',
+                data: unemploymentData
+            };
+            barChartData.datasets.push(unemploymentDataset);
+            barChartData.labels = unemploymentCityList;
+            myBar.options.title.text = 'Unemployment Rate for Cities in Victoria';
+            myBar.update();
+        });
+
+        {# get the threshold for each scenario #}
+        var education_step = [
+            {% for step in education_distribution.keys() %}
+                '{{ step }}',
+            {% endfor %}
+        ];
+        var economic_step = [
+            {% for step in economic_distribution.keys() %}
+                '{{ step }}',
+            {% endfor %}
+        ];
+        var unemployment_step = [
+            {% for step in unemployment_distribution.keys() %}
+                '{{ step }}',
+            {% endfor %}
+        ];
+        var wordcount_step = [
+            {% for step in wordcount_distribution.keys() %}
+                '{{ step }}',
+            {% endfor %}
+        ];
+        var colorScale = ['#f407dd', '#f96be3', '#fa9fe9', '#f8c5ed', '#f5e0f0', '#f2f0f2', '#f0fdf3'];
+
+        {# setup the config for pie chart in each scenario #}
+        var educationPieConfig = {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [
+                        {% for data in education_distribution.values() %}
+                            '{{ data }}',
+                        {% endfor %}
+                    ],
+                    backgroundColor: colorScale,
+                label: 'Education Level'
+                }],
+            labels: education_step,
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    enabled:false,
+                },
+                title: {
+                    display: true,
+                    text: 'Education Level Counts in Different Range',
+                    fontColor: '#cccccc',
+                    fontSize: 50,
+                },
+                legend: {
+                    display: true,
+                    labels:{
+                        fontColor: '#cccccc',
+                        padding: 30,
+                        fontSize: 36,
+                        boxWidth: 100,
+                    },
+                    position: 'left'
+                }
+            }
+        };
+        var economicPieConfig = {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [
+                        {% for data in economic_distribution.values() %}
+                            '{{ data }}',
+                        {% endfor %}
+                    ],
+                    backgroundColor: colorScale,
+                label: 'Economic Index'
+                }],
+            labels: economic_step,
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    enabled:false,
+                },
+                title: {
+                    display: true,
+                    text: 'Economic Index Counts in Different Range',
+                    fontColor: '#cccccc',
+                    fontSize: 50,
+                },
+                legend: {
+                    display: true,
+                    labels:{
+                        fontColor: '#cccccc',
+                        padding: 30,
+                        fontSize: 36,
+                        boxWidth: 100,
+                    },
+                    position: 'left'
+                }
+            }
+        };
+        var unemploymentPieConfig = {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [
+                        {% for data in unemployment_distribution.values() %}
+                            '{{ data }}',
+                        {% endfor %}
+                    ],
+                    backgroundColor: colorScale,
+                label: 'Unemployment Rate'
+                }],
+            labels: unemployment_step,
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    enabled:false,
+                },
+                title: {
+                    display: true,
+                    text: 'Unemployment Rate Counts in Different Range',
+                    fontColor: '#cccccc',
+                    fontSize: 50,
+                },
+                legend: {
+                    display: true,
+                    labels:{
+                        fontColor: '#cccccc',
+                        padding: 30,
+                        fontSize: 36,
+                        boxWidth: 100,
+                    },
+                    position: 'left'
+                }
+            }
+        };
+        var wordcountPieConfig = {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [
+                        {% for data in wordcount_distribution.values() %}
+                            '{{ data }}',
+                        {% endfor %}
+                    ],
+                    backgroundColor: colorScale,
+                label: 'Wordcount Level'
+                }],
+            labels: wordcount_step,
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    enabled:false,
+                },
+                title: {
+                    display: true,
+                    text: 'Word Counts in Different Range',
+                    fontColor: '#cccccc',
+                    fontSize: 50,
+                },
+                legend: {
+                    display: true,
+                    labels:{
+                        fontColor: '#cccccc',
+                        padding: 30,
+                        fontSize: 36,
+                        boxWidth: 100,
+                    },
+                    position: 'left'
+                }
+            }
+        };
+        var emotionPieConfig = {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: [
+                        {% for data in emotion_stat.values() %}
+                            '{{ data }}',
+                        {% endfor %}
+                    ],
+                    backgroundColor: ['#f96be3', '#3970dd', '#754af7'],
+                label: 'Emotion'
+                }],
+            labels: ['Positve', 'Negative', 'Neutral'],
+            },
+            options: {
+                responsive: true,
+                tooltips: {
+                    enabled:false,
+                },
+                title: {
+                    display: true,
+                    text: '                    Emotion Summaries',
+                    fontColor: '#cccccc',
+                    fontSize: 50,
+                },
+                legend: {
+                    display: true,
+                    labels:{
+                        fontColor: '#cccccc',
+                        padding: 30,
+                        fontSize: 36,
+                        boxWidth: 100,
+                    },
+                    position: 'left'
+                }
+            }
+        };
+        {# draw piecharts #}
+        var educationCtx = document.getElementById('education_piechart').getContext('2d');
+        educationPie = new Chart(educationCtx, educationPieConfig);
+        var economicCtx = document.getElementById('economic_piechart').getContext('2d');
+        economicPie = new Chart(economicCtx, economicPieConfig);
+        var unemploymentCtx = document.getElementById('unemployment_piechart').getContext('2d');
+        unemploymentPie = new Chart(unemploymentCtx, unemploymentPieConfig);
+        var wordcountCtx = document.getElementById('wordcount_piechart').getContext('2d');
+        wordcountPie = new Chart(wordcountCtx, wordcountPieConfig);
+        var emotionCtx = document.getElementById('emotion_piechart').getContext('2d');
+        emotionPie = new Chart(emotionCtx, emotionPieConfig);
+
+    </script>
+</body>
+</html>
