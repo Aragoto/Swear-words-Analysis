@@ -78,7 +78,7 @@ except:
                 print("Can not access to the database! \n Please Check your internet.")
 db_dirty = couch["dirty_words"]
 db_emotion = couch["emotion"]
-#db_id = couch["tweet_id"]
+db_id = couch["tweet_id"]
 dirty_word_dic = GetDirtyList()
 
 def in_suburb(longitude, latitude, suburb):
@@ -157,32 +157,28 @@ def get_tweets(tweetJson, dirty_word_dic):
 
         print(dataDict)
         print("*****************************************")
-        CheckTweetID_And_AddToDB(dataDict, dirty_word_dic)
+        CheckTweetID_And_AddToDB(dataDict)
         
 
 
-
-
-def DirtyWordProcess(dataDict, dirty_word_dic):
+def DirtyWordProcess(dataDict):
     #get the dirty words of tweets by regular expression, store them to couchdb
-    dirty_word_dic = GetDirtyList()
     tmp_dic = dataDict
     if tmp_dic["geo"] != None and tmp_dic["geo"] != "not specified" and  tmp_dic["geo"] != "" and tmp_dic["geo"] != None:
-        #check the geo information is not empty
         txt = tmp_dic["text"]
-        txt = txt.lower()
+        txt = txt.lower() 
         tmp_list = re.findall(r"\w+",txt)
         added_list = []
         for word in tmp_list:
             db_entry = {}
             if word in dirty_word_dic.keys() and word not in added_list:
                 db_entry["dirty_word"] = word
-                db_entry["id"] = tmp_dic["id"]
                 db_entry["city"] = tmp_dic["geo"]
                 added_list.append(word)
                 db_dirty.save(db_entry)
             else:
                 pass
+
 
 def EmotionProcess(dataDict):
     #transform polarity to positive, negative and neutral, and save to couchdb
@@ -198,26 +194,27 @@ def EmotionProcess(dataDict):
         else:
             dic_tweet["emotion"] = "Neutral"
         db_entry["city"] = tmp_dic["geo"]
-        db_entry["id"] = tmp_dic["id"]
         db_entry["emotion"] = dic_tweet["emotion"]
         db_emotion.save(db_entry)
 
-def CheckTweetID_And_AddToDB(dataDict, dirty_word_dic):
+def CheckTweetID_And_AddToDB(dataDict):
     #chech the tweet with same id have saved in couchdb or not, to decide whether this tweet to upload or not
     tmp_dic = dataDict
     id = str(tmp_dic["id"])
     db_entry = {}
     record = None
-    if tmp_dic["geo"] != None and tmp_dic["geo"] != "not specified" and tmp_dic["geo"] != "" and tmp_dic["geo"] != None:
+    if tmp_dic["geo"] != "not specified" and tmp_dic["geo"] != None:
+        #check the geo information is not empty
         for rec in db_id.view('tweet_id_record/tweet_id', key = id):
             record = rec
         if record == None:
             db_entry["tweet_id"] = id
             db_id.save(db_entry)
             EmotionProcess(dataDict)
-            DirtyWordProcess(dataDict, dirty_word_dic)
+            DirtyWordProcess(dataDict)
         else:
             print(id, ", this tweet's information has been added to the database!")
+
     
 
 maxid = None
@@ -322,4 +319,4 @@ while True:
                 start[i] = time.time()
                 print("changed to the" + str(i + 1) + " credential.")
                 continue
-            
+                        
