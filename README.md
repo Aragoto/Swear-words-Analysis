@@ -1,6 +1,6 @@
 # Swear-words-Analysis
 
-> 2020 COMP90024 Group 66
+### 2020 COMP90024 Group 66
 
 ## Team Menbers
 
