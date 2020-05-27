@@ -9,7 +9,7 @@ In the stage of deployment we implement Ansible Automation to deploy and configu
 
 The steps in playbooks are specified in ```roles```.
 
-We used ```host_vars```  to provide all variables we need during the deployment.
+```host_vars```  provides all variables we used during the deployment.
 
 To achieve complete automation the program we designed can store the ip addresses automatically in ```nodes.txt``` and ```host.ini``` under directory ```inventory```.
 
