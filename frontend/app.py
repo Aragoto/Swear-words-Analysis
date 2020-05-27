@@ -1,3 +1,9 @@
+# Group 66 Swear Words Analysis
+# Xinshu Li 875109
+# Dongting Hu 960886
+# Qinwei Yuan 1006223
+# Ansheng Dong  989973
+# Tonghao Wang 1039694
 from flask import Flask, render_template, url_for, redirect
 import os
 from importlib import reload
