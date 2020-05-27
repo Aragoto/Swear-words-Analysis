@@ -12,6 +12,6 @@
 
 ## Project Structure
 
-- ```Ansible```: automacal deployment of the cloud-based system 
+- ```Ansible```: automatica deployment of the cloud-based system 
 - ```database```: CouchDB and Harvester scripts
 - ```frontend```: web development
