@@ -102,6 +102,7 @@ except:
 def get_tweets(tweetJson, dirty_word_dic):
     #process the qualified tweet to normalized data
     dataDict = {}
+    dataDict['geo'] = None
     if tweetJson['full_text']:
         text = tweetJson['full_text']
         dataDict['text'] = text
