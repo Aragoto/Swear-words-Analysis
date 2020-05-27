@@ -1,3 +1,9 @@
+# Group 66 Swear Words Analysis
+# Xinshu Li 875109
+# Dongting Hu 960886
+# Qinwei Yuan 1006223
+# Ansheng Dong  989973
+# Tonghao Wang 1039694
 import json
 import pandas as pd
 import get_dirty_view_4
