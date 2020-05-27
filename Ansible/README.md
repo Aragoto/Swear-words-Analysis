@@ -7,7 +7,7 @@ In the stage of deployment we implement Ansible Automation to deploy and configu
 3. CouchDB deployment-```couchdb_deploy.yaml```
 4. Web deployment-```web_deploy.yaml```
 
-The steps of playbooks are specified in ```roles```.
+The steps in playbooks are specified in ```roles```.
 
 We used ```host_vars```  to provide all variables we need during the deployment.
 
