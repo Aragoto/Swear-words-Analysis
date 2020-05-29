@@ -15,9 +15,10 @@ import argparse
 import socket
 import http.client
 import urllib3
-from http.client import IncompleteRead as http_incompleteRead
-from urllib3.exceptions import IncompleteRead as urllib3_incompleteRea
 from get_nodes import get_ip
+
+from http.client import IncompleteRead as http_incompleteRead
+from urllib3.exceptions import IncompleteRead as urllib3_incompleteRead
 
 
 cities = ["Ballarat", "Banyule", "Baw Baw", "Bayside", "Benalla", "Boroondara", "Brimbank", "Campaspe",
@@ -184,11 +185,11 @@ args = parser.parse_args()
 class TweetListener(StreamListener):
 
     def on_data(self, data):
-        try:
-            tweetJson = js.loads(data, encoding= 'utf-8')
-            if not tweetJson["text"].startswith('RT') and tweetJson["retweeted"] == False:
-                #file.write(data)
-                dealStream(tweetJson, dirty_word_dic)
+
+        tweetJson = js.loads(data, encoding= 'utf-8')
+        if not tweetJson["text"].startswith('RT') and tweetJson["retweeted"] == False:
+            #file.write(data)
+            dealStream(tweetJson)
         except BaseException as e:
             print(e)
             time.sleep(10)
@@ -203,8 +204,8 @@ class TweetListener(StreamListener):
             time.sleep(10)
             return True
         return True
-    
-    def on_error(self, status_code):
+
+    def on_error(self, status):
         #Handle other errors
         print (status_code)
         if status_code == 420:
@@ -213,6 +214,7 @@ class TweetListener(StreamListener):
             time.sleep(15*60 + 1)
         else:
             time.sleep(10)
+
 
 
 
