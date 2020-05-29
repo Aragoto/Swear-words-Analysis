@@ -13,7 +13,10 @@ import time
 import re
 import argparse
 import socket
-
+import http.client
+import urllib3
+from http.client import IncompleteRead as http_incompleteRead
+from urllib3.exceptions import IncompleteRead as urllib3_incompleteRea
 from get_nodes import get_ip
 
 
@@ -74,6 +77,7 @@ def dealStream(tweetJson):
         text = tweetJson['text']
         blob = TextBlob(text)
         dataDict["polarity"] = blob.sentiment.polarity
+        dataDict["geo"] = None
         #generate the sentiment of the text
         if tweetJson.get('user'):
             dataDict['id'] = tweetJson['id']
@@ -180,17 +184,35 @@ args = parser.parse_args()
 class TweetListener(StreamListener):
 
     def on_data(self, data):
+        try:
+            tweetJson = js.loads(data, encoding= 'utf-8')
+            if not tweetJson["text"].startswith('RT') and tweetJson["retweeted"] == False:
+                #file.write(data)
+                dealStream(tweetJson, dirty_word_dic)
+        except BaseException as e:
+            print(e)
+            time.sleep(10)
+            return True
 
-        tweetJson = js.loads(data, encoding= 'utf-8')
-        if not tweetJson["text"].startswith('RT') and tweetJson["retweeted"] == False:
-            #file.write(data)
-            dealStream(tweetJson)
-
+        except http_incompleteRead as e:
+            print(e)
+            time.sleep(10)
+            return True
+        except urllib3_incompleteRead as e:
+            print(e)
+            time.sleep(10)
+            return True
         return True
-
-    def on_error(self, status):
-        print (status)
-
+    
+    def on_error(self, status_code):
+        #Handle other errors
+        print (status_code)
+        if status_code == 420:
+            time.sleep(10)
+        if status_code == 429:
+            time.sleep(15*60 + 1)
+        else:
+            time.sleep(10)
 
 
 
